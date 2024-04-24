@@ -74,8 +74,8 @@ if __name__ == '__main__':
     old_img_path = f"{images}/{fl_nm}_0.{ext}"
     new_img_path = f"{images}/{fl_nm}_1.{ext}"
 
-    old_img = loaa_img(old_img_path)
-    new_img = loaa_img(new_img_path)
+    old_img = load_img(old_img_path)
+    new_img = load_img(new_img_path)
 
     align_new_img = align_image(PIL_cv2(old_img), PIL_cv2(new_img))
 
