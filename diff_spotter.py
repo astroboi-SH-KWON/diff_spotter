@@ -30,3 +30,22 @@ class Utils:
         """
         return Image.open(img_path)
 
+    def PIL_cv2(self, PIL_img):
+        """
+        Convert PIL.Image to openCV2
+        :param PIL_img: type PIL.Image
+        :return: openCV2
+        """
+        numpy_image = np.array(PIL_img)
+        opencv_image = cv2.cvtColor(numpy_image, cv2.COLOR_RGB2BGR)
+        return opencv_image
+
+    def cv2_PIL(self, cv2_img):
+        """
+        Convert openCV2 to PIL.Image
+        :param cv2_img: openCV2
+        :return: type PIL.Image
+        """
+        color_coverted = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(color_coverted)
+        return pil_image
