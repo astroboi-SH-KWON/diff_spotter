@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def loaa_img(img_path):
+def load_img(img_path):
     return Image.open(img_path)
 
 
