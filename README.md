@@ -6,6 +6,7 @@ Spot the Difference
         pip install opencv-contrib-python==4.6.0.66  # cv2는 반드시 pip 설치, ximgproc 사용위해 opencv-contrib-python 설치
         # # python=3.11.4 opencv=4.6.0.66 
         conda install conda-forge::matplotlib  # v3.8.4
+        pip install imreg  # v2024.1.2, similarity for template_matcher
 
 
     trouble shooting
