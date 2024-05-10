@@ -18,7 +18,7 @@ class DiffSpotter:
         :param img_1: type PIL.Image
         :return: type PIL.Image
         """
-        # # RGBA 인 png 파일 등은 RGB 로 변환해 준다.
+        # # Convert RGBA file like png to RGB
         return ImageChops.difference(img_0.convert("RGB"), img_1.convert("RGB"))
 
 
@@ -103,12 +103,23 @@ class Utils:
         return aligned_im2
 
     def rgb2gray(self, rgb, scale=None):
-        """Return float grayscale image from RGB24 or RGB48 image."""
+        """
+        Return float grayscale image from RGB24 or RGB48 image.
+        :param rgb: rgb image
+        :param scale:
+        :return: gray_scale image
+        """
         scale = np.iinfo(rgb.dtype).max if scale is None else scale
         scale = np.array([[[0.299, 0.587, 0.114]]], np.float32) / scale
         return np.sum(rgb * scale, axis=-1)
 
     def rgba2rgb(self, rgba, background=(255, 255, 255)):
+        """
+        Convert RGBA file like png to RGB
+        :param rgba: rgba like png file
+        :param background:
+        :return: rgb image
+        """
         row, col, ch = rgba.shape
 
         if ch == 3:
@@ -134,24 +145,30 @@ class TemplateMatcher:
     def __init__(self):
         pass
 
-    def brute_force_scale_invariant_template_matching(
-            self,
-            template,  # grayscale image
-            search,  # scaled and cropped grayscale image
-            zooms=(1.0, 0.5, 0.25),  # sequence of zoom factors to try
-            size=None,  # power-of-two size of square sliding window
-            delta=None,  # advance of sliding windows. default: half window size
-            min_overlap=0.25,  # minimum overlap of search with window
-            max_diff=0.05,  # max average of search - window differences in overlap
-            max_angle=0.5,  # no rotation
+    def brute_force_scale_invariant_template_matching(self,
+            template,
+            search,
+            zooms=(1.0, 0.5, 0.25),
+            size=None,
+            delta=None,
+            min_overlap=0.25,
+            max_diff=0.05,
+            max_angle=0.5,
     ):
-        """Return yoffset, xoffset, and scale of first match of search in template.
-
+        """
         Iterate over scaled versions of the template image in overlapping sliding
         windows and run FFT-based algorithm for translation, rotation and
         scale-invariant image registration until a match of the search image is
         found in the sliding window.
-
+        :param template: grayscale image
+        :param search: scaled and cropped grayscale image
+        :param zooms: sequence of zoom factors to try
+        :param size: power-of-two size of square sliding window
+        :param delta: advance of sliding windows. default: half window size
+        :param min_overlap: minimum overlap of search with window
+        :param max_diff: max average of search - window differences in overlap
+        :param max_angle: no rotation
+        :return: yoffset, xoffset, and scale of first match of search in template
         """
         if size is None:
             size = int(pow(2, int(math.log(min(search.shape), 2))))
@@ -182,7 +199,14 @@ class TemplateMatcher:
         raise ValueError('no match of search image found in template')
 
     def template_matching(self, im1_path, im2_path):
+        """
+        calculate ratio of template matching for 2 images
+        :param im1_path:
+        :param im2_path:
+        :return: ratio of template matching
+        """
         utils = Utils()
+
         template = imagecodecs.imread(im1_path)
         search = imagecodecs.imread(im2_path)
 
