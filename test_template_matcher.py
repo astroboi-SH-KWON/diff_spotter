@@ -29,6 +29,9 @@ if __name__ == '__main__':
 
     diff_res = diff.spot_diff(old_img, util.cv2_PIL(align_new_img))
 
+    diff_res = util.draw_diff_bbox(util.PIL_cv2(diff_res), dark_threshold=45)
+
     # # cv2로 그리기
-    cv2.imshow("result", util.PIL_cv2(diff_res))
+    # cv2.imshow("result", util.PIL_cv2(diff_res))
+    cv2.imshow("result", diff_res)
     cv2.waitKey(0)
