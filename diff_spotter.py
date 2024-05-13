@@ -140,6 +140,30 @@ class Utils:
 
         return np.asarray(rgb, dtype='uint8')
 
+    def draw_diff_bbox(self, diff_img, dark_threshold=25):
+        """
+        Draw bounding boxes on the spots of differences.
+        :param diff_img: type openCV2
+        :param dark_threshold: grayscale values range from 0 to 255, with 0 being the darkest.
+                            Since values that are too dark (25 or less) are not useful
+                            , apply a threshold to consider only values greater than that.
+        :return: type openCV2
+        """
+        gray = cv2.cvtColor(diff_img, cv2.COLOR_BGR2GRAY)
+        # # remove line noises
+        gray = (gray > dark_threshold) * gray
+
+        contours, _ = cv2.findContours(gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+        COLOR = (0, 200, 0)
+
+        for cnt in contours:
+            if cv2.contourArea(cnt) > 100:  # 사각형 크기가 100 보다 큰 경우에만 그리기
+                x, y, width, height = cv2.boundingRect(cnt)
+                cv2.rectangle(diff_img, (x, y), (x + width, y + height), COLOR, 2)
+
+        return diff_img
+
 
 class TemplateMatcher:
     def __init__(self):
