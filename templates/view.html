@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title><<< DIFF_SPOTTER >>></title>
+    </head>
+    <script src="./static/jquery-3.7.1.js"></script>
+    <body>
+        <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
+
+            <form id="upload-file" method="post" enctype="multipart/form-data">
+                <fieldset>
+                    <h1 align="center">DIFF_SPOTTER</h1>
+                </fieldset>
+                <fieldset>
+                    <label>Select 1st file</label>
+                    <input id="file_1" name="file_1" type="file">
+                    <label>||   Select 2nd file</label>
+                    <input id="file_2" name="file_2" type="file">
+                </fieldset>
+                <fieldset>
+                    <label>Select reduction ratio (< 0.01)</label>
+                    <input id="reduction_ratio" name="reduction_ratio" value="0.01" min="0.01">
+                    <button id="upload-file-btn" type="button" style="background-color: #008CBA; border: none; color: white; padding: 10px 20px; font-size: 16px;">SUMMIT</button>
+                </fieldset>
+            </form>
+        </div>
+        <div align="center"><img id="diff_res"></div>
+
+        <script type="text/javascript">
+
+            $(function() {
+                $('#upload-file-btn').click(function() {
+                    if ($('#reduction_ratio').val() > 0.01) {
+                        alert("Reduction ratio < 0.01");
+                        console.log("Reduction ratio < 0.01");
+                        $('input[name=reduction_ratio').val('0.01');
+                        return false;
+                    } else if ($('#file_1').get(0).files.length === 0 || $('#file_2').get(0).files.length === 0 ) {
+                        alert("No files selected.");
+                        console.log("No files selected.");
+                        return false;
+                    }
+
+                    var form_data = new FormData($('#upload-file')[0]);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/uploadajax',
+                        data: form_data,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        success: function(result) {
+                            console.log('Success!');
+                            document.getElementById('diff_res').src = 'data:image/gif;base64,' + result;
+                            $('input[name=file_1').val('');
+                            $('input[name=file_2').val('');
+                        },
+                        error: function(result){
+                            console.log(result);
+                            alert(result.responseText);
+                        }
+                    });
+                });
+            });
+
+        </script>
+
+
+    </body>
+</html>
