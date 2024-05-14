@@ -5,6 +5,7 @@ import math
 import scipy.ndimage
 import imagecodecs
 import imreg
+import os
 
 
 class DiffSpotter:
@@ -231,6 +232,19 @@ class Utils:
                 final_image[current_pos:image.shape[0] + current_pos, :image.shape[1], :] = image
             current_pos += image.shape[int(horizontal)]
         return final_image
+
+    def remove_files_by_days(self, path, now, days=1):
+        """
+        Remove old files by days
+        :param path: directory path
+        :param now: time.time()
+        :param days:
+        """
+        for f in os.listdir(path):
+            f = os.path.join(path, f)
+            if os.stat(f).st_mtime < now - days * 86400:
+                if os.path.isfile(f):
+                    os.remove(f)
 
 
 class TemplateMatcher:
