@@ -13,8 +13,8 @@ if __name__ == '__main__':
     util = Utils()
     diff = DiffSpotter()
 
-    old_img = util.load_img(old_img_path)
-    new_img = util.load_img(new_img_path)
+    old_img = util.load_img_by_PIL(old_img_path)
+    new_img = util.load_img_by_PIL(new_img_path)
 
     align_new_img = util.align_image(util.PIL_cv2(old_img), util.PIL_cv2(new_img))
 
