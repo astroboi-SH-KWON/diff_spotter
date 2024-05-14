@@ -202,6 +202,36 @@ class Utils:
 
         return diff_img
 
+    def concat_images(self, img_list, horizontal=True):
+        """
+        Concatenate images of different shapes (vertically or horizontally)
+        :param img_list:
+        :param horizontal: True for horizontally
+        :return:stacked image
+        """
+        max_len = 0  # find the max length of all the images
+        total_len = 0  # the total length of the stacked images
+
+        for img in img_list:
+            if img.shape[int(not horizontal)] > max_len:
+                max_len = img.shape[int(not horizontal)]
+            total_len += img.shape[int(horizontal)]
+
+        # create a new array with a size large enough to contain all the images
+        final_image = np.zeros((max_len, total_len, 3), dtype=np.uint8) if horizontal else np.zeros(
+            (total_len, max_len, 3), dtype=np.uint8)
+        # final_image = np.zeros((total_height, max_len, 3), dtype=np.uint8)
+
+        current_pos = 0  # keep track of where your current image was last placed
+        for image in img_list:
+            # add an image to the final array and increment the current_pos
+            if horizontal:
+                final_image[:image.shape[0], current_pos:image.shape[1] + current_pos, :] = image
+            else:
+                final_image[current_pos:image.shape[0] + current_pos, :image.shape[1], :] = image
+            current_pos += image.shape[int(horizontal)]
+        return final_image
+
 
 class TemplateMatcher:
     def __init__(self):
