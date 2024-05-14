@@ -10,6 +10,9 @@ if __name__ == '__main__':
     fl_nm = "park"
     old_img_path = f"{images}/{fl_nm}_0.{ext}"
     # new_img_path = f"{images}/{fl_nm}_1.{ext}"
+
+    # old_img_path = "images/tmp/img_1.jpg"
+    # new_img_path = "images/tmp/img_2.jpg"
     # # https://forum.image.sc/t/align-two-versions-of-the-same-image-that-are-at-different-resolutions-and-one-is-cropped/54737/2
     new_img_path = f"{images}/{fl_nm}_1_small.{ext}"
 
@@ -17,11 +20,14 @@ if __name__ == '__main__':
     util = Utils()
     diff = DiffSpotter()
 
-    rvrs_scale = tm.template_matching(old_img_path, new_img_path)
+    old_img = util.load_img_by_imagecodecs(old_img_path)
+    new_img = util.load_img_by_imagecodecs(new_img_path)
+
+    rvrs_scale = tm.template_matching(old_img, new_img)
     print(f"\nrvrs_scale {rvrs_scale}")
 
-    old_img = util.load_img(old_img_path)
-    new_img = util.load_img(new_img_path)
+    old_img = util.load_img_by_PIL(old_img_path)
+    new_img = util.load_img_by_PIL(new_img_path)
 
     new_img = new_img.resize((int(new_img.size[0] * rvrs_scale), int(new_img.size[1] * rvrs_scale)))
 

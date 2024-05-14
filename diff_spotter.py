@@ -26,13 +26,51 @@ class Utils:
     def __init__(self):
         pass
 
-    def load_img(self, img_path):
+    def load_img_by_PIL(self, img_path):
         """
         Load image by PIL.Image
         :param img_path: String
         :return: type PIL.Image
         """
         return Image.open(img_path)
+
+    def load_img_by_cv2(self, img_path, option=cv2.IMREAD_COLOR):
+        """
+        Load image by openCV2
+        :param img_path:
+        :param option: cv2.IMREAD_COLOR, cv2.IMREAD_GRAYSCALE, cv2.IMREAD_UNCHANGED (including alpha channel)
+        :return: type openCV2
+        """
+        return cv2.imread(img_path, option)
+
+    def load_img_by_imagecodecs(self, img_path):
+        """
+        Load image by imagecodecs
+        :param img_path:String
+        :return:
+        """
+        return imagecodecs.imread(img_path)
+
+    def bts_to_img(self, bts):
+        """
+        bytes array to type openCV2
+        :param bts: results from image_to_bts
+        :return: type openCV2
+        """
+        buff = np.frombuffer(bts, np.uint8)
+        buff = buff.reshape(1, -1)
+        img = cv2.imdecode(buff, cv2.IMREAD_COLOR)
+        return img
+
+    def image_to_bts(self, img):
+        """
+        Get image bytes from image
+        :param img:  type openCV2
+        :return: Image bytes, WxHx3 ndarray
+        """
+        _, bts = cv2.imencode('.jpg', img)
+        bts = bts.tobytes()
+        return bts
 
     def PIL_cv2(self, PIL_img):
         """
@@ -222,17 +260,15 @@ class TemplateMatcher:
                         )
         raise ValueError('no match of search image found in template')
 
-    def template_matching(self, im1_path, im2_path):
+    def template_matching(self, template, search, reduction_ratio=0.01):
         """
         calculate ratio of template matching for 2 images
-        :param im1_path:
-        :param im2_path:
+        :param template:
+        :param search:
+        :param reduction_ratio: reduction ratio of zooms array
         :return: ratio of template matching
         """
         utils = Utils()
-
-        template = imagecodecs.imread(im1_path)
-        search = imagecodecs.imread(im2_path)
 
         if template.shape[0] * template.shape[1] > search.shape[0] * search.shape[1]:
             tmp = template.copy()
@@ -258,10 +294,10 @@ class TemplateMatcher:
                 return 1 / scale
             except Exception as err:
                 print(f"[ERROR] {err}")
-                zooms = [i * 1.01 if i != zooms[-1] else i * 0.999 for i in zooms]
+                zooms = [i * (1 + reduction_ratio) if i != zooms[-1] else i * (1 - reduction_ratio) for i in zooms]
                 if zooms[-2] > zooms[-1]:
                     print("Reduce ratio")
                     break
-                print(zooms)
+                print(f"NEW zooms {zooms}")
                 trial_n += 1
                 pass
