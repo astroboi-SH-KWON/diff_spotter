@@ -17,16 +17,38 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    log.info("START ::::::::::::::::::::::")
-    print("START ::::::::::::::::::::::")
-    return render_template('view.html')
+    log.info("START home ::::::::::::::::::::::")
+    print("START home ::::::::::::::::::::::")
+    return render_template('home.html')
 
 
-@app.route('/uploadajax', methods=['POST'])
-def upldfile():
+@app.route("/diff_spotter")
+def diff_spotter():
+    log.info("START diff_spotter ::::::::::::::::::::::")
+    print("START diff_spotter ::::::::::::::::::::::")
+    return render_template('diff_spotter.html')
+
+
+@app.route("/object_matcher")
+def object_matcher():
+    log.info("START object_matcher ::::::::::::::::::::::")
+    print("START object_matcher ::::::::::::::::::::::")
+    return render_template('object_matcher.html')
+
+
+@app.route("/ony_ocr")
+def ony_ocr():
+    log.info("START ony_ocr ::::::::::::::::::::::")
+    print("START ony_ocr ::::::::::::::::::::::")
+    return render_template('ony_ocr.html')
+
+
+@app.route('/diff_spotter_uploadajax', methods=['POST'])
+def diff_spotter_upldfile():
     if request.method == 'POST':
         util = Utils()
 
+        min_size = int(request.form.get("min_size", type=float))
         reduction_ratio = request.form.get("reduction_ratio", type=float)
         # read image file string data
         file_1 = request.files['file_1'].read()
@@ -53,7 +75,7 @@ def upldfile():
             print(err)
             return abort(make_response(str(err), 500))
 
-        diff_res = get_diff_spotter(img_1, img_2, reduction_ratio)
+        diff_res = get_diff_spotter(img_1, img_2, reduction_ratio, min_size)
 
         concat_res = util.concat_images([decd_img_1, diff_res, decd_img_2])
 
@@ -64,7 +86,7 @@ def upldfile():
         return response
 
 
-def get_diff_spotter(old_img, new_img, reduction_ratio):
+def get_diff_spotter_w_template_matching(old_img, new_img, reduction_ratio, min_size):
     tm = TemplateMatcher()
     util = Utils()
     diff = DiffSpotter()
@@ -82,6 +104,22 @@ def get_diff_spotter(old_img, new_img, reduction_ratio):
     diff_res = diff.spot_diff(old_img, util.cv2_PIL(align_new_img))
 
     diff_res = util.draw_diff_bbox(util.PIL_cv2(diff_res), dark_threshold=35)
+
+    return diff_res
+
+
+def get_diff_spotter(old_img, new_img, reduction_ratio, min_size):
+    util = Utils()
+    diff = DiffSpotter()
+
+    old_img = util.cv2_PIL(old_img)
+    new_img = util.cv2_PIL(new_img)
+
+    align_new_img = util.align_image(util.PIL_cv2(old_img), util.PIL_cv2(new_img))
+
+    diff_res = diff.spot_diff(old_img, util.cv2_PIL(align_new_img))
+
+    diff_res = util.draw_diff_bbox(util.PIL_cv2(diff_res), min_size=min_size, dark_threshold=35)
 
     return diff_res
 
