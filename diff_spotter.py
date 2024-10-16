@@ -5,6 +5,8 @@ import math
 import scipy.ndimage
 import imagecodecs
 import imreg
+import string
+import base64
 import os
 
 
@@ -179,7 +181,7 @@ class Utils:
 
         return np.asarray(rgb, dtype='uint8')
 
-    def draw_diff_bbox(self, diff_img, dark_threshold=25):
+    def draw_diff_bbox(self, diff_img, min_size=100, dark_threshold=25):
         """
         Draw bounding boxes on the spots of differences.
         :param diff_img: type openCV2
@@ -197,7 +199,9 @@ class Utils:
         COLOR = (0, 200, 0)
 
         for cnt in contours:
-            if cv2.contourArea(cnt) > 100:  # 사각형 크기가 100 보다 큰 경우에만 그리기
+            # x, y, width, height = cv2.boundingRect(cnt)
+            # cv2.rectangle(diff_img, (x, y), (x + width, y + height), COLOR, 2)
+            if cv2.contourArea(cnt) > min_size:  # 사각형 크기가 min_size 보다 큰 경우에만 그리기
                 x, y, width, height = cv2.boundingRect(cnt)
                 cv2.rectangle(diff_img, (x, y), (x + width, y + height), COLOR, 2)
 
@@ -245,6 +249,49 @@ class Utils:
             if os.stat(f).st_mtime < now - days * 86400:
                 if os.path.isfile(f):
                     os.remove(f)
+
+    def make_img_from_result_dict(self, debug_image, coordinate_dict):
+        for key, v in coordinate_dict.items():
+            distnt, bbox = v['score'], (v['x'], v['y'], v['w'], v['h'])
+
+            cv2.rectangle(debug_image, (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])), [0, 0, 255],
+                          thickness=1)
+            if "0_" in key:  # == 0:
+                cv2.putText(debug_image, f"[{key}]" + str(round(distnt, 2)), (int(bbox[0]), int(bbox[1]) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, [0, 0, 255], 2)
+            else:
+                cv2.putText(debug_image, f"[{key}]" + str(round(distnt, 2)), (int(bbox[0]), int(bbox[1]) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, [0, 0, 255], 1)
+            print(f"rank [{key}], similarity: {str(round(distnt, 2))} ::: {bbox}")
+
+        return debug_image
+
+    def is_hexadecimal(self, s):
+        """
+        Check if a string is hexadecimal or not
+        :param s: String
+        :return: True/False
+        """
+        return all(c in string.hexdigits for c in s)
+
+    def is_base64(self, s):
+        """
+        Check if a string is encoded by base64 or not
+        :param s: String
+        :return: True/False
+        """
+        try:
+            if isinstance(s, str):
+                # If there's any unicode here, an exception will be thrown and the function will return false
+                s_bytes = bytes(s, 'ascii')
+            elif isinstance(s, bytes):
+                s_bytes = s
+            else:
+                raise ValueError("Argument must be string or bytes")
+            return base64.b64encode(base64.b64decode(s_bytes)) == s_bytes
+        except Exception as err:
+            print(f"[ERROR-is_base64] {err}")
+            return False
 
 
 class TemplateMatcher:
@@ -320,9 +367,10 @@ class TemplateMatcher:
             search = tmp
 
         print(f"{(search.shape[0] * search.shape[1]) / (template.shape[0] * template.shape[1])}")
+        print(math.ceil((search.shape[0] * search.shape[1]) / (template.shape[0] * template.shape[1]) * 10))
 
-        multi_n = math.ceil((search.shape[0] * search.shape[1]) / (template.shape[0] * template.shape[1]) * 10) - 10
-        print(multi_n)
+        multi_n = math.ceil((search.shape[0] * search.shape[1]) / (template.shape[0] * template.shape[1]) * 10) - 9
+        print(f"multi_n {multi_n}")
         template = utils.rgba2rgb(template)
         search = utils.rgba2rgb(search)
 
