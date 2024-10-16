@@ -92,8 +92,8 @@ def get_diff_spotter(old_img, new_img, min_size):
 if __name__ == '__main__':
     port = 8028
     # app.debug = True
-    app.run(debug=True, host='127.0.0.1', port=port)
-    # app.run(debug=True, host='0.0.0.0', port=port)
+    # app.run(debug=True, host='127.0.0.1', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)
 
 """
 sudo lsof -i :8028  
